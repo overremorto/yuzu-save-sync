@@ -2,10 +2,9 @@
 import { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
 import { basename, resolve } from 'path'
 import { readdir, copyFile, mkdir } from 'fs/promises';
-import GAME_MAPPING from '../mapping.json';
 import { existsSync } from "fs";
-
-export type TGame = keyof typeof GAME_MAPPING;
+import { TGame } from "./helpers";
+import GAME_MAPPING from '../mapping.json';
 
 export interface SyncerConfig {
     connectionString: string;
@@ -36,7 +35,7 @@ export class Syncer {
 
     async save(gameName: TGame): Promise<void> {
         await this.init();
-        const directoryPath = resolve(this.config.saveDirectory, GAME_MAPPING[gameName]);
+        const directoryPath = resolve(this.config.saveDirectory);
         const files = await readdir(directoryPath);
         console.log(`found ${files.length} files in "${directoryPath}"`);
         for (const filename of files) {
@@ -51,7 +50,7 @@ export class Syncer {
 
     async restore(gameName: TGame): Promise<void> {
         await this.init();
-        const directoryPath = resolve(this.config.saveDirectory, GAME_MAPPING[gameName]);
+        const directoryPath = resolve(this.config.saveDirectory);
         await this.localBackup(gameName);
         if (!existsSync(directoryPath)) {
             await mkdir(directoryPath, { recursive: true });
@@ -68,7 +67,7 @@ export class Syncer {
 
     async localBackup(gameName: TGame): Promise<void> {
         await this.init();
-        const directoryPath = resolve(this.config.saveDirectory, GAME_MAPPING[gameName]);
+        const directoryPath = resolve(this.config.saveDirectory);
         if (!existsSync(directoryPath)) {
             console.log(`no files to backup from "${directoryPath}"`)
             return;
